@@ -7,18 +7,22 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends ActionBarActivity {
 
-    public static final long REPEAT_INTERVAL = 500;
+    private static final long REPEAT_INTERVAL = 100;
     private TextView textView1;
     private TextView textView2;
     private TextView textView3;
-    private int cnt = 0;
     private Timer timer1;
     private Timer timer2;
+    private Timer timer3;
+    private int cnt = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,13 +40,25 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
 
+                // 0 ～ 9 の数値が入ったリストを作成
+                List<Integer> list1 = new ArrayList();
+                createList(list1);
+                List<Integer> list2 = new ArrayList();
+                createList(list2);
+                List<Integer> list3 = new ArrayList();
+                createList(list3);
+
                 timer1 = new Timer();
-                TimerTask timerTask1 = new TimerTask1(textView1);
+                TimerTask timerTask1 = new TimerTask1(textView1, list1);
                 timer1.scheduleAtFixedRate(timerTask1, REPEAT_INTERVAL, REPEAT_INTERVAL);
 
                 timer2 = new Timer();
-                TimerTask timerTask2 = new TimerTask1(textView2);
+                TimerTask timerTask2 = new TimerTask1(textView2, list2);
                 timer2.scheduleAtFixedRate(timerTask2, REPEAT_INTERVAL, REPEAT_INTERVAL);
+
+                timer3 = new Timer();
+                TimerTask timerTask3 = new TimerTask1(textView3, list3);
+                timer3.scheduleAtFixedRate(timerTask3, REPEAT_INTERVAL, REPEAT_INTERVAL);
 
             }
 
@@ -63,6 +79,22 @@ public class MainActivity extends ActionBarActivity {
                 cancelTimer(timer2);
             }
         });
+
+        Button btnStop3 = (Button)findViewById(R.id.btnStop3);
+        btnStop3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cancelTimer(timer3);
+            }
+        });
+    }
+
+    private void createList(List<Integer> list){
+        for ( int i = 0; i < 10; i++ ) {
+            list.add(i);
+        }
+        // 重複のない乱数にする為にシャッフルします
+        Collections.shuffle(list);
     }
 
     @Override
@@ -83,9 +115,11 @@ public class MainActivity extends ActionBarActivity {
 
         private Handler handler = new Handler();
         private TextView textView;
+        private List<Integer> list;
 
-        public TimerTask1(TextView textView) {
+        public TimerTask1(TextView textView, List<Integer> list) {
             this.textView = textView;
+            this.list = list;
         }
 
         @Override
@@ -93,8 +127,11 @@ public class MainActivity extends ActionBarActivity {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    textView.setText(String.valueOf(cnt));
+                    textView.setText(String.valueOf(list.get(cnt)));
                     cnt+=1;
+                    if(cnt == 10){
+                        cnt = 0;
+                    }
                 }
             });
         }
